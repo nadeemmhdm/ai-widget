@@ -28,10 +28,33 @@ jobs:
         run: npm run validate:release
       - name: Build Windows installers
         run: npm run tauri build
+      - name: Runtime smoke test
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $exe = Resolve-Path 'src-tauri/target/release/nook-ai-pet.exe'
+          $process = Start-Process -FilePath $exe -PassThru
+          Start-Sleep -Seconds 10
+          $process.Refresh()
+          if ($process.HasExited) {
+            $log = Join-Path $env:LOCALAPPDATA 'Nook AI Pet\logs\startup.log'
+            if (Test-Path $log) {
+              Write-Host '--- Nook startup log ---'
+              Get-Content $log
+            }
+            throw "Nook exited during startup smoke test with exit code $($process.ExitCode)"
+          }
+          Write-Host "Nook stayed alive during startup smoke test (PID $($process.Id))."
+          Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+          $log = Join-Path $env:LOCALAPPDATA 'Nook AI Pet\logs\startup.log'
+          if (Test-Path $log) {
+            Write-Host '--- Nook startup log ---'
+            Get-Content $log
+          }
       - name: Upload NSIS and MSI installers
         uses: actions/upload-artifact@v4
         with:
-          name: nook-ai-pet-windows-v1.0.0
+          name: nook-ai-pet-windows-v1.0.1
           if-no-files-found: error
           path: |
             src-tauri/target/release/bundle/nsis/*.exe
