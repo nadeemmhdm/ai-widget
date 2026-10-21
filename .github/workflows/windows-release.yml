@@ -1,0 +1,57 @@
+name: Windows Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.90'
+      - name: Install frontend dependencies
+        run: npm install
+      - name: Validate source
+        run: npm run validate:release
+      - name: Generate updater release config
+        env:
+          TAURI_SIGNING_PUBLIC_KEY: ${{ secrets.TAURI_SIGNING_PUBLIC_KEY }}
+        run: node scripts/make-release-config.mjs
+      - name: Import optional Windows Authenticode certificate
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: ./scripts/import-windows-certificate.ps1
+      - name: Add optional certificate settings
+        if: env.NOOK_WINDOWS_CERT_THUMBPRINT != ''
+        shell: pwsh
+        run: |
+          $p = 'release/tauri.release.conf.json'
+          $cfg = Get-Content $p -Raw | ConvertFrom-Json
+          if (-not $cfg.bundle.windows) { $cfg.bundle | Add-Member -NotePropertyName windows -NotePropertyValue ([pscustomobject]@{}) }
+          $cfg.bundle.windows | Add-Member -Force -NotePropertyName certificateThumbprint -NotePropertyValue $env:NOOK_WINDOWS_CERT_THUMBPRINT
+          $cfg.bundle.windows | Add-Member -Force -NotePropertyName digestAlgorithm -NotePropertyValue 'sha256'
+          $cfg | ConvertTo-Json -Depth 10 | Set-Content $p
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: v__VERSION__
+          releaseName: 'Nook AI Pet v__VERSION__'
+          releaseBody: 'Windows NSIS/MSI release for Nook AI Pet.'
+          releaseDraft: true
+          prerelease: false
+          args: --config release/tauri.release.conf.json

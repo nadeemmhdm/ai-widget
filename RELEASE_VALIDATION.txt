@@ -1,0 +1,17 @@
+Nook AI Pet v1.0.0 — Release validation
+Date: 2026-10-21
+
+PASS  TypeScript/TSX syntax transpile (23 files)
+PASS  Relative TypeScript import validation
+PASS  JSON parsing: package.json, tauri.conf.json, capabilities/default.json
+PASS  Version alignment: package.json / Cargo.toml / tauri.conf.json = 1.0.0
+PASS  Tauri updater Rust plugin initialization present
+PASS  updater:default capability present
+PASS  Onboarding component present
+PASS  Error boundary / recovery component present
+PASS  Security static scan: no arbitrary cmd.exe / PowerShell / pwsh execution pattern exposed
+PASS  Cloud key localStorage persistence guard
+PASS  GitHub workflow YAML parse
+
+LIMITATION
+npm dependency installation timed out in the packaging environment and Rust/MSVC is unavailable here. Therefore this report does not claim a native Windows compiler/linker test. Use the included Windows CI workflow or a Windows development host for that step.

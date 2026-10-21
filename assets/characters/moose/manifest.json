@@ -1,0 +1,7 @@
+{
+  "id": "moose",
+  "format": "glb-ready",
+  "model": "moose.glb",
+  "fallback": "procedural",
+  "animationContract": ["idle", "walk", "dance", "hurt", "angry", "sleep", "happy", "eat", "play", "wave", "surprised"]
+}

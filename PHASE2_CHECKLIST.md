@@ -1,0 +1,21 @@
+# Phase 2 completion checklist
+
+- [x] Bear character
+- [x] Panda character
+- [x] Snake character
+- [x] Moose character
+- [x] Character selector
+- [x] Persistent character choice
+- [x] Shared animation contract
+- [x] Character-specific locomotion
+- [x] Eat interaction
+- [x] Play interaction
+- [x] Food props
+- [x] Toy props
+- [x] Per-character favorite items
+- [x] Per-character mood persistence
+- [x] Natural language character switching
+- [x] Natural language feed/play commands
+- [x] Character-aware AI prompt
+- [x] GLB-ready manifests
+- [x] Documentation updated

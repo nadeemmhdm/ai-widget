@@ -1,0 +1,7 @@
+{
+  "id": "panda",
+  "format": "glb-ready",
+  "model": "panda.glb",
+  "fallback": "procedural",
+  "animationContract": ["idle", "walk", "dance", "hurt", "angry", "sleep", "happy", "eat", "play", "wave", "surprised"]
+}

@@ -1,0 +1,32 @@
+[package]
+name = "nook-ai-pet"
+version = "1.0.0"
+description = "Animated 3D AI desktop pet for Windows"
+authors = ["Nook Project"]
+edition = "2021"
+rust-version = "1.90"
+
+[lib]
+name = "nook_ai_pet_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-autostart = "2"
+tauri-plugin-updater = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+rusqlite = { version = "0.37", features = ["bundled"] }
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde", "clock"] }
+walkdir = "2"
+dirs = "6"
+tokio = { version = "1", features = ["time"] }
+
+[target.'cfg(windows)'.dependencies]
+keyring = { version = "3", features = ["windows-native"] }
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging", "Win32_System_Power"] }
