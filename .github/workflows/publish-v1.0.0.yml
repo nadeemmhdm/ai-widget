@@ -1,0 +1,47 @@
+name: Publish v1.0.0 Release Assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v1.0.0.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download verified Windows build artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 39595099631 -n nook-ai-pet-windows-v1.0.0 -D release-assets
+
+      - name: Prepare clean installer filenames
+        shell: bash
+        run: |
+          set -euo pipefail
+          exe="$(find release-assets -type f -name '*.exe' -print -quit)"
+          msi="$(find release-assets -type f -name '*.msi' -print -quit)"
+          test -n "$exe"
+          test -n "$msi"
+          cp "$exe" Nook-AI-Pet-1.0.0-Windows-x64-Setup.exe
+          cp "$msi" Nook-AI-Pet-1.0.0-Windows-x64.msi
+          sha256sum Nook-AI-Pet-1.0.0-Windows-x64-Setup.exe Nook-AI-Pet-1.0.0-Windows-x64.msi
+
+      - name: Publish installers and repair release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload v1.0.0 \
+            Nook-AI-Pet-1.0.0-Windows-x64-Setup.exe \
+            Nook-AI-Pet-1.0.0-Windows-x64.msi \
+            --clobber
+          gh release edit v1.0.0 \
+            --title "Nook AI Pet v1.0.0" \
+            --notes-file RELEASE_NOTES_v1.0.0.md
