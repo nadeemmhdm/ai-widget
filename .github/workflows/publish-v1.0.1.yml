@@ -1,0 +1,67 @@
+name: Publish v1.0.1 Hotfix
+
+on:
+  workflow_run:
+    workflows: ['Windows Build']
+    types: [completed]
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tested commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Verify hotfix version
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node -p "require('./package.json').version")" = "1.0.1"
+
+      - name: Download smoke-tested Windows installers
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download ${{ github.event.workflow_run.id }} -n nook-ai-pet-windows-v1.0.1 -D release-assets
+
+      - name: Prepare clean filenames
+        shell: bash
+        run: |
+          set -euo pipefail
+          exe="$(find release-assets -type f -name '*.exe' -print -quit)"
+          msi="$(find release-assets -type f -name '*.msi' -print -quit)"
+          test -n "$exe"
+          test -n "$msi"
+          cp "$exe" Nook-AI-Pet-1.0.1-Windows-x64-Setup.exe
+          cp "$msi" Nook-AI-Pet-1.0.1-Windows-x64.msi
+          sha256sum Nook-AI-Pet-1.0.1-Windows-x64-Setup.exe Nook-AI-Pet-1.0.1-Windows-x64.msi
+
+      - name: Create or update v1.0.1 release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          if gh release view v1.0.1 >/dev/null 2>&1; then
+            gh release upload v1.0.1 \
+              Nook-AI-Pet-1.0.1-Windows-x64-Setup.exe \
+              Nook-AI-Pet-1.0.1-Windows-x64.msi \
+              --clobber
+            gh release edit v1.0.1 \
+              --title "Nook AI Pet v1.0.1" \
+              --notes-file RELEASE_NOTES_v1.0.1.md
+          else
+            gh release create v1.0.1 \
+              Nook-AI-Pet-1.0.1-Windows-x64-Setup.exe \
+              Nook-AI-Pet-1.0.1-Windows-x64.msi \
+              --target "$HEAD_SHA" \
+              --title "Nook AI Pet v1.0.1" \
+              --notes-file RELEASE_NOTES_v1.0.1.md
+          fi
