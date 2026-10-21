@@ -1,6 +1,6 @@
 [package]
 name = "nook-ai-pet"
-version = "1.0.0"
+version = "1.0.1"
 description = "Animated 3D AI desktop pet for Windows"
 authors = ["Nook Project"]
 edition = "2021"
