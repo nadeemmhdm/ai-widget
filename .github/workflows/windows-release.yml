@@ -23,7 +23,9 @@ jobs:
         run: npm install
       - name: Validate source
         run: npm run validate:release
-      - name: Generate updater release config
+      - name: Compile frontend
+        run: npm run build
+      - name: Generate release config
         env:
           TAURI_SIGNING_PUBLIC_KEY: ${{ secrets.TAURI_SIGNING_PUBLIC_KEY }}
         run: node scripts/make-release-config.mjs
@@ -43,7 +45,8 @@ jobs:
           $cfg.bundle.windows | Add-Member -Force -NotePropertyName certificateThumbprint -NotePropertyValue $env:NOOK_WINDOWS_CERT_THUMBPRINT
           $cfg.bundle.windows | Add-Member -Force -NotePropertyName digestAlgorithm -NotePropertyValue 'sha256'
           $cfg | ConvertTo-Json -Depth 10 | Set-Content $p
-      - uses: tauri-apps/tauri-action@v0
+      - name: Build and publish Windows release
+        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
