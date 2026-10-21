@@ -1,6 +1,11 @@
 # Nook AI Pet v1.0.0
 
-First complete Windows source release of Nook AI Pet.
+First public Windows release of Nook AI Pet.
+
+## Downloads
+
+- **Windows Setup (EXE)** — recommended for most users
+- **Windows MSI** — alternative installer for managed/manual installs
 
 ## Highlights
 
@@ -16,13 +21,13 @@ First complete Windows source release of Nook AI Pet.
 - First-run onboarding
 - Crash-safe frontend recovery
 - Windows autostart
-- NSIS/MSI release configuration
-- Signed Tauri updater release pipeline and optional Windows Authenticode signing hook
 
-## Security posture
+## Build verification
 
-Nook does not expose arbitrary shell/PowerShell execution to the AI. File access is restricted to configured roots, and cloud API secrets are not written to localStorage or SQLite.
+The Windows frontend, Rust/Tauri application, NSIS installer and MSI installer were successfully built and verified by GitHub Actions from commit `e17e70f4480dde2a45c62dd21ad939560d434680`.
 
-## Publishing note
+## Security
 
-Auto-update publishing requires a stable Tauri updater signing key pair. Keep the private updater key secure and backed up before distributing v1.0.0 to users.
+Nook does not expose arbitrary shell or PowerShell execution to the AI. File access is restricted to configured roots, and cloud API secrets are not stored in localStorage or SQLite.
+
+> Note: this release does not require updater-signing secrets to install. Windows may still show a SmartScreen warning until Authenticode code signing is configured for future releases.
